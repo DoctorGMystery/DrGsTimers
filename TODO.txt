@@ -1,0 +1,25 @@
+HTBFBU = has to be fixed before update
+HTBDBU = has to be done before update
+
+
+BUGS:
+TODO: BUG: Server crashes when adding debug timers; BUG-PRIORITY: mid; HTBDBU: yes
+
+To-Do now:
+
+
+To-Do before release:
+TODO: rename minuets to minutes
+
+Later Features:
+TODO: FEATURE: Client-Side timers; FEATURE-PRIORITY: low; HTBDBU: no
+TODO: FEATURE: show only specified timers to player; FEATURE-PRIORITY: high; HTBDBU: yes
+TODO: FEATURE: show timers to player also when they are not running (when specified); FEATURE-PRIORITY: mid; HTBDBU: yes
+TODO: FEATURE: make each timer customizable individuality; FEATURE-PRIORITY: low; HTBDBU: no
+TODO: FEATURE: make Timers editable through gui; FEATURE-PRIORITY: mid; HTBDBU: yes
+TODO: FEATURE: add different time display formats; FEATURE-PRIORITY: low; HTBDBU: no
+TODO: FEATURE: add information to rendered timers, if they are paused because they don't tick when the game is paused; FEATURE-PRIORITY: low; HTBDBU: yes
+TODO: FEATURE: make package send less often by only sending packages when the running boolean of a Timer changes; FEATURE-PRIORITY: high; HTBDBU: no
+TODO: FEATURE: add Version checker for mod; FEATURE-PRIORITY: low; HTBDBU: no
+TODO: FEATURE: offset for timers; FEATURE-PRIORITY: high; HTBDBU: yes
+TODO: FEATURE: api to implement into your own mod; FEATURE-PRIORITY: mid; HTBDBU: no
