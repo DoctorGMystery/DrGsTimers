@@ -3,18 +3,19 @@ package net.doctorg.drgstimers.events;
 import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.InputHandler;
 import net.doctorg.drgstimers.client.gui.TimerOverlay;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterGuiOverlaysEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = DoctorGsTimers.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
 
     @SubscribeEvent
     public static void registerOverlay(RegisterGuiOverlaysEvent event) {
-        event.registerAboveAll("timer_overlay", TimerOverlay.INSTANCE);
+        event.registerAboveAll(new ResourceLocation("timer_overlay"), TimerOverlay.INSTANCE);
     }
 
     @SubscribeEvent

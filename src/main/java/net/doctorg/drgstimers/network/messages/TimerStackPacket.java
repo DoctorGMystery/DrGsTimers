@@ -1,29 +1,34 @@
 package net.doctorg.drgstimers.network.messages;
 
+import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.ClientTimer;
 import net.doctorg.drgstimers.client.ClientTimerHandler;
+import net.doctorg.drgstimers.data.TimerData;
 import net.doctorg.drgstimers.util.NegativeDateTimeException;
 import net.doctorg.drgstimers.util.TimerHandler;
-import net.doctorg.drgstimers.data.TimerData;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
 
-public class TimerStackPacket {
-    private final HashMap<String, ? extends TimerData> timerStack;
+public record TimerStackPacket(HashMap<String, ? extends TimerData> timerStack) implements CustomPacketPayload {
 
-    public TimerStackPacket(HashMap<String, ? extends TimerData> timerStack) {
-        this.timerStack = timerStack;
-    }
+    public static final ResourceLocation ID = new ResourceLocation(DoctorGsTimers.MOD_ID, "timer_stack_packet");
 
     public TimerStackPacket(FriendlyByteBuf buf) {
-        timerStack = (HashMap<String, ClientTimer>) buf.readMap(FriendlyByteBuf::readUtf, TimerStackPacket::readTimer);
+        this(new HashMap<>(buf.readMap(FriendlyByteBuf::readUtf, TimerStackPacket::readTimer)));
     }
 
-    public void encode(FriendlyByteBuf buf) {
+    @Override
+    public void write(FriendlyByteBuf buf) {
         writeTimerStack(buf, timerStack);
+    }
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
     }
 
     private static void writeTimerStack(FriendlyByteBuf buf, HashMap<String, ? extends TimerData> timerStack) {
@@ -63,15 +68,14 @@ public class TimerStackPacket {
         public Handler() {
         }
 
-        public static void handle(TimerStackPacket message, Supplier<NetworkEvent.Context> context) {
-            context.get().enqueueWork(() -> {
-                    if (TimerHandler.getClientInstance() == null) {
-                        new ClientTimerHandler(context);
+        public static void handle(TimerStackPacket message, IPayloadContext context) {
+            context.workHandler().execute(() -> {
+                        if (TimerHandler.getClientInstance() == null) {
+                            new ClientTimerHandler(context);
+                        }
+                        ClientTimerHandler.updateClientTimerHandler(context, (HashMap<String, ClientTimer>) message.timerStack);
                     }
-                    ClientTimerHandler.updateClientTimerHandler(context, (HashMap<String, ClientTimer>) message.timerStack);
-                }
             );
-            context.get().setPacketHandled(true);
         }
     }
 }

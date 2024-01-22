@@ -2,18 +2,17 @@ package net.doctorg.drgstimers.client;
 
 import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.data.TimerHandlerBase;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
     protected static ClientTimerHandler Instance;
 
-    public ClientTimerHandler(Supplier<NetworkEvent.Context> context) throws IllegalArgumentException {
+    public ClientTimerHandler(IPayloadContext context) throws IllegalArgumentException {
         if (context == null) {
             DoctorGsTimers.LOGGER.error("Illegal try to instantiate ClientTimerHandler!");
             throw new IllegalArgumentException("Illegal try to instantiate ClientTimerHandler: context is null");
@@ -34,7 +33,7 @@ public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
         return null;
     }
 
-    public static void updateClientTimerHandler(Supplier<NetworkEvent.Context> context, HashMap<String, ClientTimer> timerStack) {
+    public static void updateClientTimerHandler(IPayloadContext context, HashMap<String, ClientTimer> timerStack) {
         if (context == null) {
             DoctorGsTimers.LOGGER.error("Illegal try to update ClientTimerHandler Instance!");
             throw new IllegalArgumentException("Illegal try to update ClientTimerHandler Instance: context is null");

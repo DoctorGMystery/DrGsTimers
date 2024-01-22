@@ -5,10 +5,10 @@ import net.doctorg.drgstimers.data.Timer;
 import net.doctorg.drgstimers.util.TimerHandler;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import org.lwjgl.glfw.GLFW;
 
 @OnlyIn(Dist.CLIENT)
@@ -22,14 +22,13 @@ public abstract class InputHandler {
     public static double scrollDelta;
 
     @SubscribeEvent
-    public static void handleInput(InputEvent event) {
+    public static void handleKeyInput(InputEvent.Key event) {
         if (KEYBIND_OPEN_SETTINGS_MENU.isDown()) {
             Minecraft.getInstance().setScreen(new TimersSettingsScreen());
         }
-    }
-
-    @SubscribeEvent
-    public static void handleKeyInput(InputEvent.Key event) {
+        if (TimerHandler.getInstance() == null) {
+            return;
+        }
         if (event.getKey() == GLFW.GLFW_KEY_KP_MULTIPLY) {
             TimerHandler.getInstance().getTimerStack().put("DEBUG-1", new Timer(10, 10, 5));
             TimerHandler.getInstance().getTimerStack().put("DEBUG-2", new Timer(17, 1, 2));
@@ -52,7 +51,7 @@ public abstract class InputHandler {
     @SubscribeEvent
     public static void onPlayerScrolling(InputEvent.MouseScrollingEvent event) {
         if (InputHandler.KEYBIND_SCROLL_TIMERS.isDown()) {
-            scrollDelta = event.getScrollDelta();
+            scrollDelta = event.getScrollDeltaY();
             event.setCanceled(true);
         }
     }

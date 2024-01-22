@@ -6,12 +6,12 @@ import net.doctorg.drgstimers.util.TimerHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.gui.overlay.ExtendedGui;
+import net.neoforged.neoforge.client.gui.overlay.IGuiOverlay;
+import net.neoforged.bus.api.SubscribeEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class TimerOverlay implements IGuiOverlay {
@@ -25,7 +25,7 @@ public class TimerOverlay implements IGuiOverlay {
     private TimerOverlay() {}
 
     @Override
-    public void render(ForgeGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
+    public void render(ExtendedGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
 
         if (TimerHandler.getClientInstance() == null) {
             return;
@@ -127,9 +127,9 @@ public class TimerOverlay implements IGuiOverlay {
     }
 
     @SubscribeEvent
-    public static void mouseScrollingScreen(ScreenEvent.MouseScrolled event) {
+    public static void mouseScrollingScreen(ScreenEvent.MouseScrolled.Pre event) {
         if (event.getMouseX() < 150) {
-            InputHandler.scrollDelta = event.getScrollDelta();
+            InputHandler.scrollDelta = event.getScrollDeltaY();
         }
     }
 }

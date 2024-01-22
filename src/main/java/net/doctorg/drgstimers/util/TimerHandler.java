@@ -4,16 +4,15 @@ import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.ClientTimerHandler;
 import net.doctorg.drgstimers.data.Timer;
 import net.doctorg.drgstimers.data.TimerHandlerBase;
-import net.doctorg.drgstimers.network.PacketHandler;
 import net.doctorg.drgstimers.network.messages.TimerStackPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Map;
 
@@ -74,31 +73,33 @@ public class TimerHandler extends TimerHandlerBase<Timer> {
         if (event.side.isServer()) {
             if (!((TickEvent.ServerTickEvent) event).getServer().isSingleplayer()) {
                 ((TickEvent.ServerTickEvent) event).getServer().getProfiler().push("sendingTimerPackage");
-                PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new TimerStackPacket(TimerHandler.getInstance().getTimerStack()));
+                PacketDistributor.ALL.noArg().send(new TimerStackPacket(TimerHandler.getInstance().getTimerStack()));
                 ((TickEvent.ServerTickEvent) event).getServer().getProfiler().pop();
             }
         }
     }
 
-    @SubscribeEvent
-    public static void onStartingServer(ServerStartingEvent event) {
-        if (Instance == null) {
-            Instance = new TimerHandler();
-            MinecraftForge.EVENT_BUS.register(getInstance());
-            for (Timer timer : getInstance().timerStack.values()) {
-                getInstance().runningTimers.put(getInstance().getKeyByValue(timer), timer);
+    public static class StaticEvents {
+        @SubscribeEvent
+        public static void onServerAboutToStart(ServerAboutToStartEvent event) {
+            if (Instance == null) {
+                Instance = new TimerHandler();
+                NeoForge.EVENT_BUS.register(getInstance());
+                for (Timer timer : getInstance().timerStack.values()) {
+                    getInstance().runningTimers.put(getInstance().getKeyByValue(timer), timer);
+                }
             }
         }
-    }
 
-    @SubscribeEvent
-    public static void onServerStopping(ServerStoppingEvent event) {
-        TimerSavedData.instance.setDirty(true);
-    }
+        @SubscribeEvent
+        public static void onServerStopping(ServerStoppingEvent event) {
+            TimerSavedData.instance.setDirty(true);
+        }
 
-    @SubscribeEvent
-    public static void onStoppedServer(ServerStoppedEvent event) {
-        Instance = null;
+        @SubscribeEvent
+        public static void onStoppedServer(ServerStoppedEvent event) {
+            Instance = null;
+        }
     }
 
     @SubscribeEvent

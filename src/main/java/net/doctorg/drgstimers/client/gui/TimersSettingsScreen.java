@@ -6,8 +6,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class TimersSettingsScreen extends Screen {
@@ -22,11 +22,11 @@ public class TimersSettingsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+    public boolean mouseScrolled(double pMouseX, double pMouseY, double pScrollX, double pScrollY) {
         if (pMouseX < 150) {
-            InputHandler.scrollDelta = pDelta;
+            InputHandler.scrollDelta = pScrollY;
         }
-        return super.mouseScrolled(pMouseX, pMouseY, pDelta);
+        return super.mouseScrolled(pMouseX, pMouseY, pScrollX, pScrollY);
     }
 
     @Override
@@ -41,14 +41,13 @@ public class TimersSettingsScreen extends Screen {
 
     @Override
     protected void init() {
-        OptionsList list = new OptionsList(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+        OptionsList list = new OptionsList(this.minecraft, this.width, this.height, 32, 25);
 
         list.addSmall(DoctorGsTimers.INSTANCE.getTimersOptions().scrollSensitivity, DoctorGsTimers.INSTANCE.getTimersOptions().showTimers);
         list.addBig(DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters);
         //list.addSmall(DoctorGsTimers.INSTANCE.getTimersOptions().yOffset, DoctorGsTimers.INSTANCE.getTimersOptions().xOffset);
 
         list.setRenderBackground(false);
-        list.setRenderTopAndBottom(false);
 
         addRenderableWidget(list);
 
