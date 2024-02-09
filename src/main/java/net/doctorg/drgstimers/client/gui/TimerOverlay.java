@@ -2,16 +2,19 @@ package net.doctorg.drgstimers.client.gui;
 
 import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.InputHandler;
+import net.doctorg.drgstimers.data.TimerData;
 import net.doctorg.drgstimers.util.TimerHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.overlay.ExtendedGui;
 import net.neoforged.neoforge.client.gui.overlay.IGuiOverlay;
-import net.neoforged.bus.api.SubscribeEvent;
+
+import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class TimerOverlay implements IGuiOverlay {
@@ -27,11 +30,11 @@ public class TimerOverlay implements IGuiOverlay {
     @Override
     public void render(ExtendedGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
 
-        if (TimerHandler.getClientInstance() == null) {
+        if (TimerHandler.getClientInstance(false) == null) {
             return;
         }
 
-        if (TimerHandler.getClientInstance().getRunningTimers().isEmpty() || gui.getMinecraft().screen instanceof TimersSettingsScreen || !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() || Minecraft.getInstance().screen instanceof PauseScreen) {
+        if (TimerHandler.getClientInstance(false).getRunningTimers().isEmpty() || gui.getMinecraft().screen instanceof TimersSettingsScreen || !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() || Minecraft.getInstance().screen instanceof PauseScreen) {
             return;
         }
 
@@ -50,10 +53,13 @@ public class TimerOverlay implements IGuiOverlay {
 
         guiGraphics.pose().pushPose();
 
-        for (String timerIdName : TimerHandler.getClientInstance().getRunningTimers().keySet()) {
-            int y = 20 * i - 17 - scrollPosition ;
+        for (Map.Entry<String, ? extends TimerData> timer : TimerHandler.getClientInstance(false).getRunningTimers().entrySet()) {
+            if (!timer.getValue().isVisible()) {
+                continue;
+            }
+            int y = 20 * i - 17 - scrollPosition;
             if (y < Minecraft.getInstance().getWindow().getGuiScaledHeight() && y + 17 > 0) {
-                drawTimer(guiGraphics, timerIdName, y);
+                drawTimer(guiGraphics, timer, y);
             }
             i++;
         }
@@ -61,11 +67,11 @@ public class TimerOverlay implements IGuiOverlay {
         guiGraphics.pose().popPose();
     }
 
-    public void drawTimer(GuiGraphics guiGraphics, String timerIdName, int y) {
-        String output = timerIdName + " " + TimerHandler.getClientInstance().getRunningTimer(timerIdName).getTime().toString();
+    public void drawTimer(GuiGraphics guiGraphics, Map.Entry<String, ? extends TimerData> timer, int y) {
+        String output = timer.getKey() + " " + timer.getValue().getTime().toString();
 
-        if (timerIdName.length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) {
-            output = timerIdName.substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) + "... " + TimerHandler.getClientInstance().getRunningTimer(timerIdName).getTime().toString();
+        if (timer.getKey().length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) {
+            output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) + "... " + timer.getValue().getTime().toString();
         }
 
         guiGraphics.fill(3, y, Minecraft.getInstance().font.width(output) + 13, y + 17, 0x44000000);
@@ -73,6 +79,8 @@ public class TimerOverlay implements IGuiOverlay {
     }
 
     public void calcScrollPosition() {
+        if (InputHandler.scrollDelta == 0) return;
+
         int calculatedScrollDelta = (int) -((double) DoctorGsTimers.INSTANCE.getTimersOptions().scrollSensitivity.get() / 100 * (InputHandler.scrollDelta * 5));
 
         /*
@@ -86,11 +94,9 @@ public class TimerOverlay implements IGuiOverlay {
          calculatedScrollDelta: to take into account the current calculatedScrollDelta, if its bigger or equal than 0
          */
 
-        //TODO: return if calculatedScrollDelta is 0 to save resources and time
-
         boolean isScrollDeltaPositive = calculatedScrollDelta > 0;
-        boolean canMoveDown = (scrollPosition + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance().getRunningTimers().size() * 20 - 3) < 0;
-        boolean shouldSnapToMax = (scrollPosition + calculatedScrollDelta + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance().getRunningTimers().size() * 20 - 3) >= 0;
+        boolean canMoveDown = (scrollPosition + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - 3) < 0;
+        boolean shouldSnapToMax = (scrollPosition + calculatedScrollDelta + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - 3) >= 0;
 
         boolean isScrollDeltaNegative = calculatedScrollDelta < 0;
         boolean canMoveUp = scrollPosition > 0;
@@ -98,7 +104,7 @@ public class TimerOverlay implements IGuiOverlay {
 
         if (isScrollDeltaPositive && canMoveDown) {
             if (shouldSnapToMax) {
-                scrollPosition = TimerHandler.getClientInstance().getRunningTimers().size() * 20 - Minecraft.getInstance().getWindow().getGuiScaledHeight() + 3;
+                scrollPosition = TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - Minecraft.getInstance().getWindow().getGuiScaledHeight() + 3;
             } else {
                 scrollPosition += calculatedScrollDelta;
             }
@@ -119,7 +125,7 @@ public class TimerOverlay implements IGuiOverlay {
     public static void screenRenderPost(ScreenEvent.Render.Post event) {
         //TODO: check if timers are displayed above other gui parts and make it more compatible with chat
         if (event.getScreen() instanceof PauseScreen) {
-            if (TimerHandler.getClientInstance() != null) {
+            if (TimerHandler.getClientInstance(false) != null) {
                 TimerOverlay.INSTANCE.renderTimers(event.getGuiGraphics());
                 TimerOverlay.INSTANCE.calcScrollPosition();
             }

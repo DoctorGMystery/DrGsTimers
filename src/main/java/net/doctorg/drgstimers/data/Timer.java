@@ -10,13 +10,13 @@ public class Timer extends TimerData {
         this.time = new DateTime(setTime);
     }
 
-    public Timer(float seconds, int minuets, int hours) {
-        this.setTime = new DateTime(seconds, minuets, hours);
+    public Timer(float seconds, int minutes, int hours) {
+        this.setTime = new DateTime(seconds, minutes, hours);
         this.time = new DateTime(setTime);
     }
 
-    public void setTime(float seconds, int minuets, int hours) {
-        this.time = new DateTime(seconds, minuets, hours);
+    public void setTime(float seconds, int minutes, int hours) {
+        this.time = new DateTime(seconds, minutes, hours);
     }
 
     public void setSetTime(DateTime setTime, boolean resetTimer) {

@@ -39,8 +39,21 @@ public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
             throw new IllegalArgumentException("Illegal try to update ClientTimerHandler Instance: context is null");
         }
 
+        HashMap<String, Boolean> visibilities = new HashMap<>();
+
+        for (Map.Entry<String, ClientTimer> e : Instance.getTimerStack().entrySet()) {
+            visibilities.put(e.getKey(), e.getValue().isVisible());
+        }
+
         Instance.getTimerStack().clear();
         Instance.getRunningTimers().clear();
+
+        for (Map.Entry<String, ClientTimer> e : timerStack.entrySet()) {
+            if (visibilities.containsKey(e.getKey())) {
+                e.getValue().setVisible(visibilities.get(e.getKey()));
+            }
+            Instance.getTimerStack().put(e.getKey(), e.getValue());
+        }
 
         Instance.getTimerStack().putAll(timerStack);
         for (Map.Entry<String, ClientTimer> entry: timerStack.entrySet()) {
@@ -52,6 +65,9 @@ public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
 
     @SubscribeEvent
     public static void onPlayerNetworkLogOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        if (event.getConnection() != null) {
+            TimersOptions.saveLevelTimerVisibilityOptions();
+        }
         ClientTimerHandler.Instance = null;
     }
 }

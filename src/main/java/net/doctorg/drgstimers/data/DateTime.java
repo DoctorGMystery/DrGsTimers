@@ -4,28 +4,28 @@ import net.doctorg.drgstimers.util.NegativeDateTimeException;
 
 public class DateTime {
     private float seconds;
-    private int minuets;
+    private int minutes;
     private int hours;
 
-    public DateTime(float seconds, int minuets, int hours) {
-        if (seconds < 0 || minuets < 0 || hours < 0) {
+    public DateTime(float seconds, int minutes, int hours) {
+        if (seconds < 0 || minutes < 0 || hours < 0) {
             throw new NegativeDateTimeException();
         }
 
         this.seconds = seconds;
-        this.minuets = minuets;
+        this.minutes = minutes;
         this.hours = hours;
 
         calcTime();
     }
 
     public DateTime(DateTime time) {
-        if (time.seconds < 0 || time.minuets < 0 || time.hours < 0) {
+        if (time.seconds < 0 || time.minutes < 0 || time.hours < 0) {
             throw new NegativeDateTimeException();
         }
 
         this.seconds = time.seconds;
-        this.minuets = time.minuets;
+        this.minutes = time.minutes;
         this.hours = time.hours;
 
         calcTime();
@@ -35,8 +35,8 @@ public class DateTime {
         return seconds;
     }
 
-    public int getMinuets() {
-        return minuets;
+    public int getMinutes() {
+        return minutes;
     }
 
     public int getHours() {
@@ -44,33 +44,33 @@ public class DateTime {
     }
 
     public boolean smallerOrEquals(DateTime compareTime) {
-        return this.hours <= compareTime.hours && this.minuets <= compareTime.minuets && this.seconds <= compareTime.seconds;
+        return this.hours <= compareTime.hours && this.minutes <= compareTime.minutes && this.seconds <= compareTime.seconds;
     }
 
-    public boolean smallerOrEquals(float seconds, int minuets, int hours) {
-        return this.hours <= hours && this.minuets <= minuets && this.seconds <= seconds;
+    public boolean smallerOrEquals(float seconds, int minutes, int hours) {
+        return this.hours <= hours && this.minutes <= minutes && this.seconds <= seconds;
     }
 
     public boolean biggerOrEquals(DateTime compareTime) {
-        return this.hours <= compareTime.hours && this.minuets <= compareTime.minuets && this.seconds <= compareTime.seconds;
+        return this.hours <= compareTime.hours && this.minutes <= compareTime.minutes && this.seconds <= compareTime.seconds;
     }
 
-    public boolean biggerOrEquals(float seconds, int minuets, int hours) {
-        return this.hours >= hours && this.minuets >= minuets && this.seconds >= seconds;
+    public boolean biggerOrEquals(float seconds, int minutes, int hours) {
+        return this.hours >= hours && this.minutes >= minutes && this.seconds >= seconds;
     }
 
     private void calcTime() {
-        int secondsToMinuets;
-        int minuetsToHours;
+        int secondsToMinutes;
+        int minutesToHours;
 
-        secondsToMinuets = (int)Math.floor(this.seconds / 60);
+        secondsToMinutes = (int)Math.floor(this.seconds / 60);
         this.seconds %= 60;
 
-        this.minuets += secondsToMinuets;
-        minuetsToHours = (int)Math.floor((float)this.minuets / 60);
-        this.minuets %= 60;
+        this.minutes += secondsToMinutes;
+        minutesToHours = (int)Math.floor((float)this.minutes / 60);
+        this.minutes %= 60;
 
-        this.hours += minuetsToHours;
+        this.hours += minutesToHours;
     }
 
     public void reduce(float timeToReduceInSec) {
@@ -82,12 +82,12 @@ public class DateTime {
         }
 
         if (this.seconds < 0) {
-            this.minuets--;
+            this.minutes--;
             this.seconds += 60;
         }
-        if (this.minuets < 0) {
+        if (this.minutes < 0) {
             this.hours--;
-            this.minuets += 60;
+            this.minutes += 60;
         }
     }
 
@@ -97,17 +97,17 @@ public class DateTime {
             return false;
         }
 
-        return this.seconds == compareTime.seconds && this.minuets == compareTime.minuets && this.hours == compareTime.hours;
+        return this.seconds == compareTime.seconds && this.minutes == compareTime.minutes && this.hours == compareTime.hours;
     }
 
-    public boolean equals(int seconds, int minuets, int hours) {
-        return this.seconds == seconds && this.minuets == minuets && this.hours == hours;
+    public boolean equals(int seconds, int minutes, int hours) {
+        return this.seconds == seconds && this.minutes == minutes && this.hours == hours;
     }
 
     @Override
     public String toString() {
         String secondsString;
-        String minuetsString;
+        String minutesString;
 
         if (seconds >= 10) {
             secondsString = ":" + (int) seconds;
@@ -115,12 +115,12 @@ public class DateTime {
             secondsString = ":0" + (int) seconds;
         }
 
-        if (minuets >= 10) {
-            minuetsString = ":" + minuets;
+        if (minutes >= 10) {
+            minutesString = ":" + minutes;
         } else {
-            minuetsString = ":0" + minuets;
+            minutesString = ":0" + minutes;
         }
 
-        return hours + minuetsString + secondsString;
+        return hours + minutesString + secondsString;
     }
 }

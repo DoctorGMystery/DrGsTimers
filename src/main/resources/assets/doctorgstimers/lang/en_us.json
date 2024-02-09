@@ -12,6 +12,7 @@
   "commands.timer.no_active_timers": "There are no timers running",
   "commands.timer.same.run_while_paused": "Nothing changed. Timer is not/already running while the game is paused",
   "commands.timer.same.set_time": "Nothing changed. Timer already is set to that time",
+  "commands.timer.same.visible": "Nothing changed. Timer is already (not) visible",
   "commands.timer.removed_timer.success": "Removed timer %s",
   "commands.timer.paused_all_running.success": "Paused all running timers",
   "commands.timer.list_active_timers.success": "The running timers are: %s",
@@ -28,5 +29,9 @@
   "commands.timer.set_run_while_paused.true.success": "Timer %s will now run when game is paused",
   "commands.timer.set_run_while_paused.false.success": "Timer %s will no longer run when game is paused",
   "commands.timer.get_run_while_paused.true.success": "Timer %s is running when game is paused",
-  "commands.timer.get_run_while_paused.false.success": "Timer %s is NOT running when game is paused"
+  "commands.timer.get_run_while_paused.false.success": "Timer %s is NOT running when game is paused",
+  "commands.timer.set_visible.true.success": "Timer %s is now visible",
+  "commands.timer.set_visible.false.success": "Timer %s is now no longer visible",
+  "commands.timer.get_visible.true.success": "Timer %s is currently visible",
+  "commands.timer.get_visible.false.success": "Timer %s is currently NOT visible"
 }

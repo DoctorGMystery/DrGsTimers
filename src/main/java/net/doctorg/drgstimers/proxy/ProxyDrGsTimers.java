@@ -1,7 +1,18 @@
 package net.doctorg.drgstimers.proxy;
 
-public interface ProxyDrGsTimers {
+import net.neoforged.fml.loading.FMLEnvironment;
 
-    void init();
+public class ProxyDrGsTimers {
 
+    private final IProxyDrGsTimers clientProxy = new ClientProxy();
+    private final IProxyDrGsTimers serverProxy = new ServerProxy();
+
+
+    public void init() {
+        if (FMLEnvironment.dist.isClient()) {
+            clientProxy.init();
+        } else {
+            serverProxy.init();
+        }
+    }
 }

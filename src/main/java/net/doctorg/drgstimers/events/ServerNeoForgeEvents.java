@@ -1,6 +1,7 @@
 package net.doctorg.drgstimers.events;
 
 import net.doctorg.drgstimers.DoctorGsTimers;
+import net.doctorg.drgstimers.network.messages.LevelIdPacket;
 import net.doctorg.drgstimers.network.messages.TimerStackPacket;
 import net.doctorg.drgstimers.util.TimerHandler;
 import net.neoforged.api.distmarker.Dist;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class ServerNeoForgeEvents {
     @SubscribeEvent
     public static void onPlayerJoins(PlayerEvent.PlayerLoggedInEvent event) {
-        PacketDistributor.ALL.noArg().send( new TimerStackPacket(TimerHandler.getInstance().getTimerStack()));
+        PacketDistributor.PLAYER.with(event.getEntity().getServer().getPlayerList().getPlayer(event.getEntity().getUUID())).send( new TimerStackPacket(TimerHandler.getInstance().getTimerStack()));
+        PacketDistributor.PLAYER.with(event.getEntity().getServer().getPlayerList().getPlayer(event.getEntity().getUUID())).send( new LevelIdPacket(TimerHandler.getInstance().getLevelId()));
     }
 }

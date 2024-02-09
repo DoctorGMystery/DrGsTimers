@@ -6,6 +6,7 @@ public abstract class TimerData {
     protected DateTime time;
     protected boolean isTimerRunning;
     protected boolean runWhileGamePaused;
+    protected boolean visible = true;
 
     public DateTime getTime() {
         return new DateTime(this.time);
@@ -22,4 +23,14 @@ public abstract class TimerData {
     public boolean getRunWhileGamePaused() {
         return this.runWhileGamePaused;
     }
+
+    /**
+     * @return always 'true' on server side
+     */
+    public boolean isVisible() { return visible; }
+
+    /**
+     * Note: Has no impact on server side
+     */
+    public void setVisible(boolean visible) { this.visible = visible; }
 }

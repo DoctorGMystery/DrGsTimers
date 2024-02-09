@@ -1,14 +1,9 @@
 package net.doctorg.drgstimers;
 
 import com.mojang.logging.LogUtils;
-import net.doctorg.drgstimers.client.ClientTimerHandler;
-import net.doctorg.drgstimers.client.InputHandler;
 import net.doctorg.drgstimers.client.TimersOptions;
-import net.doctorg.drgstimers.client.gui.TimerOverlay;
 import net.doctorg.drgstimers.network.PacketHandler;
-import net.doctorg.drgstimers.proxy.ClientProxy;
 import net.doctorg.drgstimers.proxy.ProxyDrGsTimers;
-import net.doctorg.drgstimers.proxy.ServerProxy;
 import net.doctorg.drgstimers.util.TimerHandler;
 import net.doctorg.drgstimers.util.TimerSavedData;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -32,7 +27,7 @@ public class DoctorGsTimers
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static DoctorGsTimers INSTANCE;
-    public static ProxyDrGsTimers[] proxy = { new ClientProxy(), new ServerProxy()};
+    public static final ProxyDrGsTimers proxy = new ProxyDrGsTimers();
 
     @OnlyIn(Dist.CLIENT)
     private TimersOptions timersOptions;
@@ -59,11 +54,7 @@ public class DoctorGsTimers
     }
 
     private void init(FMLCommonSetupEvent event) {
-        if (FMLEnvironment.dist.isClient()) {
-            proxy[0].init();
-        } else {
-            proxy[1].init();
-        }
+        proxy.init();
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
@@ -73,5 +64,8 @@ public class DoctorGsTimers
     @SubscribeEvent
     void onServerStarting(ServerStartingEvent event) {
         TimerSavedData.instance = event.getServer().overworld().getDataStorage().computeIfAbsent(new SavedData.Factory<>(TimerSavedData::new, TimerSavedData::load), "timers");
+        if (FMLEnvironment.dist.isClient()) {
+            TimersOptions.loadLevelTimerVisibilityOptions();
+        }
     }
 }

@@ -30,8 +30,11 @@ public class TimerHandler extends TimerHandlerBase<Timer> {
         return Instance;
     }
 
-    public static TimerHandlerBase<?> getClientInstance() {
-        if (Minecraft.getInstance().hasSingleplayerServer()) {
+    /**
+     * @param checkForLocalServer use true when not sure if the integrated server is still/already loaded (starting/stopping phases)
+     */
+    public static TimerHandlerBase<?> getClientInstance(boolean checkForLocalServer) {
+        if ((checkForLocalServer && Minecraft.getInstance().isLocalServer()) || Minecraft.getInstance().hasSingleplayerServer()) {
             return Instance;
         }
         return ClientTimerHandler.getInstance();

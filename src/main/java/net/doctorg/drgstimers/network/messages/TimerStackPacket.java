@@ -40,7 +40,7 @@ public record TimerStackPacket(HashMap<String, ? extends TimerData> timerStack) 
             timer.getTime();
         } catch (NegativeDateTimeException ndte) {
             buf.writeFloat(timer.getSetTime().getSeconds());
-            buf.writeInt(timer.getSetTime().getMinuets());
+            buf.writeInt(timer.getSetTime().getMinutes());
             buf.writeInt(timer.getSetTime().getHours());
             buf.writeFloat(0);
             buf.writeInt(0);
@@ -50,10 +50,10 @@ public record TimerStackPacket(HashMap<String, ? extends TimerData> timerStack) 
             return;
         }
         buf.writeFloat(timer.getSetTime().getSeconds());
-        buf.writeInt(timer.getSetTime().getMinuets());
+        buf.writeInt(timer.getSetTime().getMinutes());
         buf.writeInt(timer.getSetTime().getHours());
         buf.writeFloat(timer.getTime().getSeconds());
-        buf.writeInt(timer.getTime().getMinuets());
+        buf.writeInt(timer.getTime().getMinutes());
         buf.writeInt(timer.getTime().getHours());
         buf.writeBoolean(timer.isTimerRunning());
         buf.writeBoolean(timer.getRunWhileGamePaused());
@@ -65,12 +65,9 @@ public record TimerStackPacket(HashMap<String, ? extends TimerData> timerStack) 
 
     public static class Handler {
 
-        public Handler() {
-        }
-
         public static void handle(TimerStackPacket message, IPayloadContext context) {
             context.workHandler().execute(() -> {
-                        if (TimerHandler.getClientInstance() == null) {
+                        if (TimerHandler.getClientInstance(false) == null) {
                             new ClientTimerHandler(context);
                         }
                         ClientTimerHandler.updateClientTimerHandler(context, (HashMap<String, ClientTimer>) message.timerStack);

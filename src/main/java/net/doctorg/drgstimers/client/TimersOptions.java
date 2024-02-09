@@ -11,9 +11,13 @@ import com.google.gson.stream.JsonReader;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.doctorg.drgstimers.DoctorGsTimers;
+import net.doctorg.drgstimers.data.TimerData;
+import net.doctorg.drgstimers.util.TimerHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -23,6 +27,8 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
@@ -226,5 +232,74 @@ public class TimersOptions {
 
     static boolean isFalse(String pValue) {
         return "false".equals(pValue);
+    }
+
+    public static void loadLevelTimerVisibilityOptions() {
+        if (TimerHandler.getClientInstance(true) == null) {
+            DoctorGsTimers.LOGGER.error("Could not load timer visibility settings for this world, because the client timer handler instance is null");
+            return;
+        }
+
+        try {
+            File playerTimerSettings = new File(Minecraft.getInstance().gameDirectory.getCanonicalPath() + "\\DrGsTimers\\", "player-timer-settings.dat");
+
+            CompoundTag fileTag = null;
+
+            try { fileTag = NbtIo.read(playerTimerSettings.toPath()); } catch (EOFException ignored) {}
+
+            if (fileTag == null) return;
+
+            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0))) DoctorGsTimers.LOGGER.debug("Could not load timer visibility settings for this world, because levelId isn't set yet");
+
+            CompoundTag timerList = fileTag.getCompound(String.valueOf(TimerHandler.getClientInstance(true).getLevelId()));
+
+            for (String key : timerList.getAllKeys()) {
+                if (!TimerHandler.getClientInstance(true).getTimerStack().containsKey(key)) continue;
+                TimerHandler.getClientInstance(true).getTimerStack().get(key).setVisible(timerList.getBoolean(key));
+            }
+        } catch (IOException e) {
+            DoctorGsTimers.LOGGER.error("Could not load timer visibility settings for this world");
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveLevelTimerVisibilityOptions() {
+        if (TimerHandler.getClientInstance(true) == null) {
+            DoctorGsTimers.LOGGER.error("Could not save timer visibility settings for this world, because the client timer handler instance is null");
+            return;
+        }
+
+        try {
+            String drGsTimers = Minecraft.getInstance().gameDirectory.getCanonicalPath() + "\\DrGsTimers\\";
+
+            File playerTimerSettings = new File(drGsTimers);
+
+            playerTimerSettings.mkdirs();
+
+            playerTimerSettings = new File(drGsTimers, "player-timer-settings.dat");
+
+            playerTimerSettings.createNewFile();
+
+            CompoundTag fileTag = null;
+
+            try { fileTag = NbtIo.read(playerTimerSettings.toPath()); } catch (EOFException ignored) {}
+
+            if (fileTag == null) fileTag = new CompoundTag();
+
+            CompoundTag timerList = new CompoundTag();
+
+            for (Map.Entry<String, ? extends TimerData> e : TimerHandler.getClientInstance(true).getTimerStack().entrySet()) {
+                timerList.putBoolean(e.getKey(), e.getValue().isVisible());
+            }
+
+            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0))) DoctorGsTimers.LOGGER.debug("Could not save timer visibility settings for this world, because levelId isn't set yet");
+
+            fileTag.put(String.valueOf(TimerHandler.getClientInstance(true).getLevelId()), timerList);
+
+            NbtIo.write(fileTag, playerTimerSettings.toPath());
+        } catch (IOException e) {
+            DoctorGsTimers.LOGGER.error("Could not save timer visibility settings for this world");
+            e.printStackTrace();
+        }
     }
 }

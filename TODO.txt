@@ -3,17 +3,16 @@ HTBDBU = has to be done before update
 
 
 BUGS:
-TODO: BUG: Server crashes when adding debug timers; BUG-PRIORITY: mid; HTBDBU: yes
+
 
 To-Do now:
 
 
 To-Do before release:
-TODO: rename minuets to minutes
+
 
 Later Features:
 TODO: FEATURE: Client-Side timers; FEATURE-PRIORITY: low; HTBDBU: no
-TODO: FEATURE: show only specified timers to player; FEATURE-PRIORITY: high; HTBDBU: yes
 TODO: FEATURE: show timers to player also when they are not running (when specified); FEATURE-PRIORITY: mid; HTBDBU: yes
 TODO: FEATURE: make each timer customizable individuality; FEATURE-PRIORITY: low; HTBDBU: no
 TODO: FEATURE: make Timers editable through gui; FEATURE-PRIORITY: mid; HTBDBU: yes

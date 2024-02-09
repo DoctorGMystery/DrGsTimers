@@ -25,7 +25,7 @@ public class TimerCommand {
         return SharedSuggestionProvider.suggest(timers.stream(), p_136345_);
     };
 
-    private static final SimpleCommandExceptionType ERROR_TIMER_NOT_EXIST = new SimpleCommandExceptionType(Component.translatable("commands.timer.not_exist"));
+    protected static final SimpleCommandExceptionType ERROR_TIMER_NOT_EXIST = new SimpleCommandExceptionType(Component.translatable("commands.timer.not_exist"));
     private static final SimpleCommandExceptionType ERROR_TIMER_ALREADY_STARTED = new SimpleCommandExceptionType(Component.translatable("commands.timer.already_started"));
     private static final SimpleCommandExceptionType ERROR_TIMER_NOT_STARTED = new SimpleCommandExceptionType(Component.translatable("commands.timer.not_started"));
     private static final SimpleCommandExceptionType ERROR_NO_ACTIVE_TIMERS = new SimpleCommandExceptionType(Component.translatable("commands.timer.no_active_timers"));
@@ -47,22 +47,22 @@ public class TimerCommand {
                                                              setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), 0, 0), BoolArgumentType.getBool(command, "reset"))
                                                         )
                                                 )
-                                                .then(Commands.argument("minuets", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("minutes", IntegerArgumentType.integer(0))
                                                         .executes((command) ->
-                                                             setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minuets"), 0), false)
+                                                             setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minutes"), 0), false)
                                                         )
                                                         .then(Commands.argument("reset", BoolArgumentType.bool())
                                                                 .executes((command) ->
-                                                                     setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minuets"), 0), BoolArgumentType.getBool(command, "reset"))
+                                                                     setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minutes"), 0), BoolArgumentType.getBool(command, "reset"))
                                                                 )
                                                         )
                                                         .then(Commands.argument("hours", IntegerArgumentType.integer(0))
                                                                 .executes((command) ->
-                                                                     setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minuets"), IntegerArgumentType.getInteger(command, "hours")), false)
+                                                                     setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minutes"), IntegerArgumentType.getInteger(command, "hours")), false)
                                                                 )
                                                                 .then(Commands.argument("reset", BoolArgumentType.bool())
                                                                         .executes((command) ->
-                                                                             setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minuets"), IntegerArgumentType.getInteger(command, "hours")), BoolArgumentType.getBool(command, "reset"))
+                                                                             setTimer(command.getSource(), StringArgumentType.getString(command, "name"), new DateTime(IntegerArgumentType.getInteger(command, "seconds"), IntegerArgumentType.getInteger(command, "minutes"), IntegerArgumentType.getInteger(command, "hours")), BoolArgumentType.getBool(command, "reset"))
                                                                         )
                                                                 )
                                                         )
@@ -133,13 +133,7 @@ public class TimerCommand {
     }
 
     private int removeTimer(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         timer.setTimerRunning(false);
         TimerHandler.getInstance().getTimerStack().remove(timerIdName);
@@ -185,13 +179,7 @@ public class TimerCommand {
     }
 
     private int startTimer(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         if (timer.isTimerRunning()) {
             throw ERROR_TIMER_ALREADY_STARTED.create();
@@ -234,13 +222,7 @@ public class TimerCommand {
     }
 
     private int getTimer(CommandSourceStack source, String timerIdName) throws CommandSyntaxException { //-ERROR
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         if (!timer.isTimerRunning()) {
             source.sendSuccess(() ->
@@ -255,13 +237,7 @@ public class TimerCommand {
     }
 
     private int getTimerSetTime(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         source.sendSuccess(() ->
              Component.translatable("commands.timer.get_set_time.success", timerIdName, timer.getSetTime().toString()), true);
@@ -270,13 +246,7 @@ public class TimerCommand {
     }
 
     private int pauseTimer(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         if (!timer.isTimerRunning()) {
             throw ERROR_TIMER_NOT_STARTED.create();
@@ -291,13 +261,7 @@ public class TimerCommand {
     }
 
     private int resetTimer(CommandSourceStack source, String timerIdName, boolean pause) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         timer.resetTime(pause);
 
@@ -314,13 +278,7 @@ public class TimerCommand {
     }
 
     private int setRunWhileGameIsPaused(CommandSourceStack source, String timerIdName, boolean value) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         if (value == timer.getRunWhileGamePaused()) {
             throw ERROR_SAME_RUN_WHILE_GAME_IS_PAUSED.create();
@@ -341,13 +299,7 @@ public class TimerCommand {
     }
 
     private int getRunWhileGameIsPaused(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        Timer timer;
-
-        try {
-            timer = TimerHandler.getInstance().getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw ERROR_TIMER_NOT_EXIST.create();
-        }
+        Timer timer = tryGetTimer(timerIdName);
 
         if (timer.getRunWhileGamePaused()) {
             source.sendSuccess(() ->
@@ -359,5 +311,13 @@ public class TimerCommand {
              Component.translatable("commands.timer.get_run_while_paused.false.success", timerIdName), true);
 
         return 0;
+    }
+
+    private static Timer tryGetTimer(String timerIdName) throws CommandSyntaxException {
+        try {
+            return TimerHandler.getInstance().getTimer(timerIdName);
+        } catch (TimerNotInListException tdnee) {
+            throw ERROR_TIMER_NOT_EXIST.create();
+        }
     }
 }

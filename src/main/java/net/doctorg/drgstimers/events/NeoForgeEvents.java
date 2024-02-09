@@ -1,9 +1,11 @@
 package net.doctorg.drgstimers.events;
 
 import net.doctorg.drgstimers.DoctorGsTimers;
+import net.doctorg.drgstimers.commands.ClientTimerCommand;
 import net.doctorg.drgstimers.commands.TimerCommand;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.server.command.ConfigCommand;
 
@@ -13,6 +15,13 @@ public class NeoForgeEvents {
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
         new TimerCommand(event.getDispatcher());
+
+        ConfigCommand.register(event.getDispatcher());
+    }
+
+    @SubscribeEvent
+    public static void onClientCommandsRegister(RegisterClientCommandsEvent event) {
+        new ClientTimerCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

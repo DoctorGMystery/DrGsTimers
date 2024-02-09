@@ -3,10 +3,13 @@ package net.doctorg.drgstimers.data;
 import net.doctorg.drgstimers.util.TimerNotInListException;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public abstract class TimerHandlerBase<T extends TimerData> {
     protected HashMap<String, T> timerStack = new HashMap<>();
     protected final HashMap<String, T> runningTimers = new HashMap<>();
+
+    protected UUID levelId = new UUID(0, 0);
 
     public T getTimer(String idName) throws TimerNotInListException {
         if (timerStack.containsKey(idName)) {
@@ -27,5 +30,13 @@ public abstract class TimerHandlerBase<T extends TimerData> {
     }
     public HashMap<String, T> getRunningTimers() {
         return runningTimers;
+    }
+
+    public UUID getLevelId() {
+        return levelId;
+    }
+
+    public void setLevelId(UUID levelId) {
+        this.levelId = levelId;
     }
 }

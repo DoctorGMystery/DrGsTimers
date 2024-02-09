@@ -5,7 +5,7 @@ import net.doctorg.drgstimers.client.InputHandler;
 import net.doctorg.drgstimers.client.gui.TimerOverlay;
 import net.neoforged.neoforge.common.NeoForge;
 
-public class ClientProxy implements ProxyDrGsTimers {
+public class ClientProxy implements IProxyDrGsTimers {
     @Override
     public void init() {
         NeoForge.EVENT_BUS.register(InputHandler.class);
