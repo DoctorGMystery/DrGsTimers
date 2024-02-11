@@ -40,9 +40,11 @@ public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
         }
 
         HashMap<String, Boolean> visibilities = new HashMap<>();
+        HashMap<String, Boolean> always_visibilities = new HashMap<>();
 
         for (Map.Entry<String, ClientTimer> e : Instance.getTimerStack().entrySet()) {
             visibilities.put(e.getKey(), e.getValue().isVisible());
+            always_visibilities.put(e.getKey(), e.getValue().isAlwaysVisible());
         }
 
         Instance.getTimerStack().clear();
@@ -51,6 +53,9 @@ public class ClientTimerHandler extends TimerHandlerBase<ClientTimer> {
         for (Map.Entry<String, ClientTimer> e : timerStack.entrySet()) {
             if (visibilities.containsKey(e.getKey())) {
                 e.getValue().setVisible(visibilities.get(e.getKey()));
+            }
+            if (always_visibilities.containsKey(e.getKey())) {
+                e.getValue().setAlwaysVisible(always_visibilities.get(e.getKey()));
             }
             Instance.getTimerStack().put(e.getKey(), e.getValue());
         }

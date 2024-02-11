@@ -4,9 +4,11 @@ import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.InputHandler;
 import net.doctorg.drgstimers.data.TimerData;
 import net.doctorg.drgstimers.util.TimerHandler;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -30,11 +32,7 @@ public class TimerOverlay implements IGuiOverlay {
     @Override
     public void render(ExtendedGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
 
-        if (TimerHandler.getClientInstance(false) == null) {
-            return;
-        }
-
-        if (TimerHandler.getClientInstance(false).getRunningTimers().isEmpty() || gui.getMinecraft().screen instanceof TimersSettingsScreen || !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() || Minecraft.getInstance().screen instanceof PauseScreen) {
+        if (gui.getMinecraft().screen instanceof TimersSettingsScreen || !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() || Minecraft.getInstance().screen instanceof PauseScreen) {
             return;
         }
 
@@ -53,14 +51,20 @@ public class TimerOverlay implements IGuiOverlay {
 
         guiGraphics.pose().pushPose();
 
-        for (Map.Entry<String, ? extends TimerData> timer : TimerHandler.getClientInstance(false).getRunningTimers().entrySet()) {
-            if (!timer.getValue().isVisible()) {
-                continue;
-            }
+        for (Map.Entry<String, ? extends TimerData> timer : TimerHandler.getClientInstance(false).getTimerStack().entrySet()) {
+            boolean visible = timer.getValue().isVisible();
+            boolean alwaysVisible = timer.getValue().isAlwaysVisible();
+            boolean running = timer.getValue().isTimerRunning();
+
+            if (!visible || (!running && !alwaysVisible)) continue;
+
             int y = 20 * i - 17 - scrollPosition;
-            if (y < Minecraft.getInstance().getWindow().getGuiScaledHeight() && y + 17 > 0) {
+            boolean inDisplayReach = y < Minecraft.getInstance().getWindow().getGuiScaledHeight() && y + 17 > 0;
+
+            if (inDisplayReach) {
                 drawTimer(guiGraphics, timer, y);
             }
+
             i++;
         }
 
@@ -74,8 +78,14 @@ public class TimerOverlay implements IGuiOverlay {
             output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) + "... " + timer.getValue().getTime().toString();
         }
 
+        Component output_comp = Component.literal(output);
+
+        if (!timer.getValue().isTimerRunning()) {
+            output_comp = Component.literal(output).withStyle(ChatFormatting.ITALIC);
+        }
+
         guiGraphics.fill(3, y, Minecraft.getInstance().font.width(output) + 13, y + 17, 0x44000000);
-        guiGraphics.drawString(Minecraft.getInstance().font, output, 8, y + 5, 0xFFFFFFFF, false);
+        guiGraphics.drawString(Minecraft.getInstance().font, output_comp, 8, y + 5, 0xFFFFFFFF, false);
     }
 
     public void calcScrollPosition() {

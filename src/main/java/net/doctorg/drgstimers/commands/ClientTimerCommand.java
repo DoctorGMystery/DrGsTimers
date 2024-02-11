@@ -24,6 +24,7 @@ public class ClientTimerCommand {
     };
 
     private static final SimpleCommandExceptionType ERROR_SAME_VISIBLE = new SimpleCommandExceptionType(Component.translatable("commands.timer.same.visible"));
+    private static final SimpleCommandExceptionType ERROR_SAME_ALWAYS_VISIBLE = new SimpleCommandExceptionType(Component.translatable("commands.timer.same.visible"));
 
 
     public ClientTimerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -40,6 +41,16 @@ public class ClientTimerCommand {
                                                 getVisible(command.getSource(), StringArgumentType.getString(command, "name"))
                                         )
                                 )
+                                .then(Commands.literal("always_visible")
+                                        .then(Commands.argument("value", BoolArgumentType.bool())
+                                                .executes((command) ->
+                                                        setAlwaysVisible(command.getSource(), StringArgumentType.getString(command, "name"), BoolArgumentType.getBool(command, "value"))
+                                                )
+                                        )
+                                        .executes((command) ->
+                                                getAlwaysVisible(command.getSource(), StringArgumentType.getString(command, "name"))
+                                        )
+                                )
                         )
                 )
         );
@@ -47,13 +58,7 @@ public class ClientTimerCommand {
 
 
     private int setVisible(CommandSourceStack source, String timerIdName, boolean value) throws CommandSyntaxException {
-        TimerData timer;
-
-        try {
-            timer = TimerHandler.getClientInstance(false).getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw TimerCommand.ERROR_TIMER_NOT_EXIST.create();
-        }
+        TimerData timer = tryGetTimer(timerIdName);
 
         if (value == timer.isVisible()) {
             throw ERROR_SAME_VISIBLE.create();
@@ -74,13 +79,7 @@ public class ClientTimerCommand {
     }
 
     private int getVisible(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
-        TimerData timer;
-
-        try {
-            timer = TimerHandler.getClientInstance(false).getTimer(timerIdName);
-        } catch (TimerNotInListException tdnee) {
-            throw TimerCommand.ERROR_TIMER_NOT_EXIST.create();
-        }
+        TimerData timer = tryGetTimer(timerIdName);
 
         if (timer.isVisible()) {
             source.sendSuccess(() ->
@@ -92,5 +91,53 @@ public class ClientTimerCommand {
                 Component.translatable("commands.timer.get_visible.false.success", timerIdName), true);
 
         return 0;
+    }
+
+    private int getAlwaysVisible(CommandSourceStack source, String timerIdName) throws CommandSyntaxException {
+        TimerData timer = tryGetTimer(timerIdName);
+
+        if (timer.isAlwaysVisible()) {
+            source.sendSuccess(() ->
+                    Component.translatable("commands.timer.get_always_visible.true.success", timerIdName), true);
+            return 0;
+        }
+
+        source.sendSuccess(() ->
+                Component.translatable("commands.timer.get_always_visible.false.success", timerIdName), true);
+
+        return 0;
+    }
+
+    private int setAlwaysVisible(CommandSourceStack source, String timerIdName, boolean value) throws CommandSyntaxException {
+        TimerData timer = tryGetTimer(timerIdName);
+
+        if (value == timer.isAlwaysVisible()) {
+            throw ERROR_SAME_ALWAYS_VISIBLE.create();
+        }
+
+        if (value) {
+            timer.setVisible(true);
+        }
+
+        timer.setAlwaysVisible(value);
+
+        if (value) {
+            source.sendSuccess(() ->
+                    Component.translatable("commands.timer.set_always_visible.true.success", timerIdName), true);
+            return 0;
+        }
+
+        source.sendSuccess(() ->
+                Component.translatable("commands.timer.set_always_visible.false.success", timerIdName), true);
+
+        return 0;
+    }
+
+    private static TimerData tryGetTimer(String timerIdName) throws CommandSyntaxException {
+        try {
+            return TimerHandler.getClientInstance(false).getTimer(timerIdName);
+        } catch (TimerNotInListException tdnee) {
+            throw TimerCommand.ERROR_TIMER_NOT_EXIST.create();
+        }
     }
 }

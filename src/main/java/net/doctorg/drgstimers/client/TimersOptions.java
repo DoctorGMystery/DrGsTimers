@@ -37,6 +37,7 @@ public class TimersOptions {
     public File timersOptionsFile;
     private static final Gson GSON = new Gson();
     private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
+    private static final int VERSION = 2;
 
     public final OptionInstance<Integer> scrollSensitivity = new OptionInstance<>("options.timer_scroll_sensitivity", OptionInstance.noTooltip(), (text, value) ->
             Component.translatable("options.percent_value", text, value), new OptionInstance.IntRange(50, 200), 100, (valueInt) -> {
@@ -249,13 +250,22 @@ public class TimersOptions {
 
             if (fileTag == null) return;
 
-            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0))) DoctorGsTimers.LOGGER.debug("Could not load timer visibility settings for this world, because levelId isn't set yet");
+            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0))) {
+                DoctorGsTimers.LOGGER.debug("Could not load timer visibility settings for this world, because levelId isn't set yet");
+                return;
+            }
 
             CompoundTag timerList = fileTag.getCompound(String.valueOf(TimerHandler.getClientInstance(true).getLevelId()));
 
+            if (timerList.getInt("version") != VERSION) {
+                DoctorGsTimers.LOGGER.debug("Could not load timer visibility settings for this world, because it uses an older version");
+                return;
+            }
+
             for (String key : timerList.getAllKeys()) {
                 if (!TimerHandler.getClientInstance(true).getTimerStack().containsKey(key)) continue;
-                TimerHandler.getClientInstance(true).getTimerStack().get(key).setVisible(timerList.getBoolean(key));
+                TimerHandler.getClientInstance(true).getTimerStack().get(key).setVisible(timerList.getCompound(key).getBoolean("visible"));
+                TimerHandler.getClientInstance(true).getTimerStack().get(key).setAlwaysVisible(timerList.getCompound(key).getBoolean("alwaysVisible"));
             }
         } catch (IOException e) {
             DoctorGsTimers.LOGGER.error("Could not load timer visibility settings for this world");
@@ -289,10 +299,20 @@ public class TimersOptions {
             CompoundTag timerList = new CompoundTag();
 
             for (Map.Entry<String, ? extends TimerData> e : TimerHandler.getClientInstance(true).getTimerStack().entrySet()) {
-                timerList.putBoolean(e.getKey(), e.getValue().isVisible());
+                CompoundTag timer = new CompoundTag();
+
+                timer.putBoolean("visible", e.getValue().isVisible());
+                timer.putBoolean("alwaysVisible", e.getValue().isAlwaysVisible());
+
+                timerList.put(e.getKey(), timer);
             }
 
-            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0))) DoctorGsTimers.LOGGER.debug("Could not save timer visibility settings for this world, because levelId isn't set yet");
+            if (TimerHandler.getClientInstance(true).getLevelId().equals(new UUID(0, 0)))  {
+                DoctorGsTimers.LOGGER.debug("Could not save timer visibility settings for this world, because levelId isn't set yet");
+                return;
+            }
+
+            timerList.putInt("version", VERSION);
 
             fileTag.put(String.valueOf(TimerHandler.getClientInstance(true).getLevelId()), timerList);
 

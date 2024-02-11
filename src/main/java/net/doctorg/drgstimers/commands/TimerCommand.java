@@ -107,7 +107,7 @@ public class TimerCommand {
                                              removeTimer(command.getSource(), StringArgumentType.getString(command, "name"))
                                         )
                                 )
-                                .then(Commands.literal("runwhilegameispaused")
+                                .then(Commands.literal("run_while_game_is_paused")
                                         .then(Commands.argument("value", BoolArgumentType.bool())
                                                 .executes((command) ->
                                                      setRunWhileGameIsPaused(command.getSource(), StringArgumentType.getString(command, "name"), BoolArgumentType.getBool(command, "value"))

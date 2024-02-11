@@ -1,5 +1,8 @@
 package net.doctorg.drgstimers.data;
 
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
 public abstract class TimerData {
 
     protected DateTime setTime;
@@ -7,6 +10,7 @@ public abstract class TimerData {
     protected boolean isTimerRunning;
     protected boolean runWhileGamePaused;
     protected boolean visible = true;
+    protected boolean alwaysVisible = false;
 
     public DateTime getTime() {
         return new DateTime(this.time);
@@ -24,13 +28,15 @@ public abstract class TimerData {
         return this.runWhileGamePaused;
     }
 
-    /**
-     * @return always 'true' on server side
-     */
+    @OnlyIn(Dist.CLIENT)
     public boolean isVisible() { return visible; }
 
-    /**
-     * Note: Has no impact on server side
-     */
+    @OnlyIn(Dist.CLIENT)
     public void setVisible(boolean visible) { this.visible = visible; }
+
+    @OnlyIn(Dist.CLIENT)
+    public boolean isAlwaysVisible() { return alwaysVisible; }
+
+    @OnlyIn(Dist.CLIENT)
+    public void setAlwaysVisible(boolean alwaysVisible) { this.alwaysVisible = alwaysVisible; }
 }
