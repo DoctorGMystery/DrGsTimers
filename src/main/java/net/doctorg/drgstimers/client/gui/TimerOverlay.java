@@ -87,42 +87,52 @@ public class TimerOverlay implements IGuiOverlay {
         int yOffset = (int) (DoctorGsTimers.INSTANCE.getTimersOptions().yOffset * Minecraft.getInstance().getWindow().getGuiScaledHeight());
 
         try {
-            int i = 0;
-
-            boolean timerIdNameSmallerThanMaxChars = timer.getKey().length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get();
-            boolean timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
-
-            if (timerIdNameSmallerThanMaxChars ||
-                    timerStringWithSpacingBOrEGuiWidth) {
-
-                output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get() - i) + "... " + timer.getValue().getTime().toString();
-
-                while (timerStringWithSpacingBOrEGuiWidth) {
-                    i++;
-                    if (!(timerIdNameSmallerThanMaxChars)) {
-                        output = timer.getKey().substring(0, timer.getKey().length() - i) + "... " + timer.getValue().getTime().toString();
-                        continue;
-                    }
-                    output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get() - i) + "... " + timer.getValue().getTime().toString();
-                    timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
-                }
-            }
+            output = shortenNameLength(timer, output, xOffset);
         } catch (StringIndexOutOfBoundsException sioobe) {
             output = timer.getKey() + " error displaying timer";
         }
 
         Component outputComp = Component.literal(output);
+        int textColor = 0xFFFFFFFF;
 
         if (!timer.getValue().isTimerRunning()) {
             outputComp = Component.literal(output).withStyle(ChatFormatting.ITALIC);
         }
 
-        if (outputComp.contains(Component.literal("error"))) {
-            outputComp = Component.literal(output).withStyle(ChatFormatting.RED);
+        if (outputComp.getString().contains("error")) {
+            textColor = 0xFFFF5555;
         }
 
         guiGraphics.fill(3 + xOffset, y + yOffset, Minecraft.getInstance().font.width(output) + 13 + xOffset, y + 17 + yOffset, 0x44000000);
-        guiGraphics.drawString(Minecraft.getInstance().font, outputComp, 8 + xOffset, y + 5 + yOffset, 0xFFFFFFFF, false);
+        guiGraphics.drawString(Minecraft.getInstance().font, outputComp, 8 + xOffset, y + 5 + yOffset, textColor, false);
+    }
+
+    public String shortenNameLength(Map.Entry<String, ? extends TimerData> timer, String output, int xOffset) {
+        boolean timerIdNameBiggerThanMaxChars = timer.getKey().length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get();
+        boolean timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
+
+        if (!timerIdNameBiggerThanMaxChars && !timerStringWithSpacingBOrEGuiWidth) {
+            return output;
+        }
+
+        int i = 0;
+
+        if (timerIdNameBiggerThanMaxChars) {
+            output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get() - i) + "... " + timer.getValue().getTime().toString();
+            timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
+
+            if (!timerStringWithSpacingBOrEGuiWidth) {
+                return output;
+            }
+        }
+
+
+        while (timerStringWithSpacingBOrEGuiWidth) {
+            i++;
+            output = timer.getKey().substring(0, timer.getKey().length() - i) + "... " + timer.getValue().getTime().toString();
+            timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
+        }
+        return output;
     }
 
     public void calcScrollPosition() {
