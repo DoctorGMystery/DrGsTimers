@@ -1,6 +1,7 @@
 {
   "timer_settings.screen.title": "Timer Settings",
   "timer_settings.screen.change_position": "Change Position And Height",
+  "timer_settings.screen.reset": "Reset",
   "key.scroll_timers": "Scroll Timers",
   "key.open_settings_menu": "Open Settings Menu",
   "key.categories.doctorgs_timers": "DoctorrG's Timers",

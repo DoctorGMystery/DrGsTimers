@@ -23,7 +23,14 @@ public class TimersSettingsScreen extends Screen {
     private final Button changePositionDone =
             Button.builder(Component.translatable("gui.done"), (button) -> setChangePositionMode(false)).build();
 
-    //TODO-GIT: offsetValueChange
+    private final Button changePositionReset =
+            Button.builder(Component.translatable("timer_settings.screen.reset"), (button) -> {
+                DoctorGsTimers.INSTANCE.getTimersOptions().yOffset = 0;
+                DoctorGsTimers.INSTANCE.getTimersOptions().xOffset = 0;
+                DoctorGsTimers.INSTANCE.getTimersOptions().save();
+                this.transformBox.setRectangle(100, DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight, (int) (DoctorGsTimers.INSTANCE.getTimersOptions().xOffset * Minecraft.getInstance().getWindow().getGuiScaledWidth()), (int) (DoctorGsTimers.INSTANCE.getTimersOptions().yOffset * Minecraft.getInstance().getWindow().getGuiScaledHeight()));
+            }).build();
+
     private final TransformScaleHeightBox transformBox =
             new TransformScaleHeightBox((int) (DoctorGsTimers.INSTANCE.getTimersOptions().xOffset * Minecraft.getInstance().getWindow().getGuiScaledWidth()), (int) (DoctorGsTimers.INSTANCE.getTimersOptions().yOffset * Minecraft.getInstance().getWindow().getGuiScaledHeight()),
                     100, DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight, Component.translatable("timer_settings.screen.position_axes"),
@@ -75,6 +82,9 @@ public class TimersSettingsScreen extends Screen {
         changePositionDone.setRectangle(50, 20, width / 2 - 25, height - 30);
         changePositionDone.active = false;
         changePositionDone.visible = false;
+        changePositionReset.setRectangle(50, 20, 10, height - 30);
+        changePositionReset.active = false;
+        changePositionReset.visible = false;
         transformBox.setRectangle(100, DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight, (int) (DoctorGsTimers.INSTANCE.getTimersOptions().xOffset * Minecraft.getInstance().getWindow().getGuiScaledWidth()), (int) (DoctorGsTimers.INSTANCE.getTimersOptions().yOffset * Minecraft.getInstance().getWindow().getGuiScaledHeight()));
         transformBox.active = false;
         transformBox.visible = false;
@@ -82,6 +92,7 @@ public class TimersSettingsScreen extends Screen {
         addRenderableWidget(transformBox);
         addRenderableWidget(changePosition);
         addRenderableWidget(changePositionDone);
+        addRenderableWidget(changePositionReset);
 
         super.init();
     }
@@ -109,6 +120,8 @@ public class TimersSettingsScreen extends Screen {
             changePosition.visible = false;
             changePositionDone.active = true;
             changePositionDone.visible = true;
+            changePositionReset.active = true;
+            changePositionReset.visible = true;
             transformBox.active = true;
             transformBox.visible = true;
             return;
@@ -119,6 +132,8 @@ public class TimersSettingsScreen extends Screen {
         changePosition.visible = true;
         changePositionDone.active = false;
         changePositionDone.visible = false;
+        changePositionReset.active = false;
+        changePositionReset.visible = false;
         transformBox.active = false;
         transformBox.visible = false;
     }
