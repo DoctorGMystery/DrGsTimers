@@ -3,6 +3,7 @@ package net.doctorg.drgstimers.client.gui;
 import net.doctorg.drgstimers.DoctorGsTimers;
 import net.doctorg.drgstimers.client.InputHandler;
 import net.doctorg.drgstimers.data.TimerData;
+import net.doctorg.drgstimers.util.NegativeDateTimeException;
 import net.doctorg.drgstimers.util.TimerHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -24,8 +25,8 @@ public class TimerOverlay implements IGuiOverlay {
     public static final TimerOverlay INSTANCE = new TimerOverlay();
 
     private int scrollPosition = 0;
-    //private int xOffset;
-    //private int yOffset;
+
+    private int visibleTimerCount;
 
     private TimerOverlay() {}
 
@@ -46,8 +47,7 @@ public class TimerOverlay implements IGuiOverlay {
 
     public void renderTimers(GuiGraphics guiGraphics) {
         int i = 1;
-        //xOffset = (int) ((double) (Minecraft.getInstance().getWindow().getGuiScaledWidth() - 74) / 100 * DoctorGsTimers.INSTANCE.getTimersOptions().xOffset.get());
-        //yOffset = (int) ((double) (Minecraft.getInstance().getWindow().getGuiScaledHeight() - 23) / 100 * DoctorGsTimers.INSTANCE.getTimersOptions().yOffset.get());
+        visibleTimerCount = 0;
 
         guiGraphics.pose().pushPose();
 
@@ -58,10 +58,14 @@ public class TimerOverlay implements IGuiOverlay {
 
             if (!visible || (!running && !alwaysVisible)) continue;
 
-            int y = 20 * i - 17 - scrollPosition;
-            boolean inDisplayReach = y < Minecraft.getInstance().getWindow().getGuiScaledHeight() && y + 17 > 0;
+            visibleTimerCount++;
 
-            if (inDisplayReach) {
+            int y = 20 * i - 17 - scrollPosition;
+
+            boolean inGuiReach = y + 17 < DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight &&
+                    y > 0;
+
+            if (inGuiReach) {
                 drawTimer(guiGraphics, timer, y);
             }
 
@@ -72,20 +76,53 @@ public class TimerOverlay implements IGuiOverlay {
     }
 
     public void drawTimer(GuiGraphics guiGraphics, Map.Entry<String, ? extends TimerData> timer, int y) {
-        String output = timer.getKey() + " " + timer.getValue().getTime().toString();
-
-        if (timer.getKey().length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) {
-            output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get()) + "... " + timer.getValue().getTime().toString();
+        String output;
+        try {
+            output = timer.getKey() + " " + timer.getValue().getTime().toString();
+        } catch (NegativeDateTimeException ndte) {
+            output = "Error displaying timer '" + timer.getKey() + "'";
         }
 
-        Component output_comp = Component.literal(output);
+        int xOffset = (int) (DoctorGsTimers.INSTANCE.getTimersOptions().xOffset * Minecraft.getInstance().getWindow().getGuiScaledWidth());
+        int yOffset = (int) (DoctorGsTimers.INSTANCE.getTimersOptions().yOffset * Minecraft.getInstance().getWindow().getGuiScaledHeight());
+
+        try {
+            int i = 0;
+
+            boolean timerIdNameSmallerThanMaxChars = timer.getKey().length() > DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get();
+            boolean timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
+
+            if (timerIdNameSmallerThanMaxChars ||
+                    timerStringWithSpacingBOrEGuiWidth) {
+
+                output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get() - i) + "... " + timer.getValue().getTime().toString();
+
+                while (timerStringWithSpacingBOrEGuiWidth) {
+                    i++;
+                    if (!(timerIdNameSmallerThanMaxChars)) {
+                        output = timer.getKey().substring(0, timer.getKey().length() - i) + "... " + timer.getValue().getTime().toString();
+                        continue;
+                    }
+                    output = timer.getKey().substring(0, DoctorGsTimers.INSTANCE.getTimersOptions().maximumCharacters.get() - i) + "... " + timer.getValue().getTime().toString();
+                    timerStringWithSpacingBOrEGuiWidth = (Minecraft.getInstance().font.width(output) + 13 + 3 + xOffset) >= Minecraft.getInstance().getWindow().getGuiScaledWidth();
+                }
+            }
+        } catch (StringIndexOutOfBoundsException sioobe) {
+            output = timer.getKey() + " error displaying timer";
+        }
+
+        Component outputComp = Component.literal(output);
 
         if (!timer.getValue().isTimerRunning()) {
-            output_comp = Component.literal(output).withStyle(ChatFormatting.ITALIC);
+            outputComp = Component.literal(output).withStyle(ChatFormatting.ITALIC);
         }
 
-        guiGraphics.fill(3, y, Minecraft.getInstance().font.width(output) + 13, y + 17, 0x44000000);
-        guiGraphics.drawString(Minecraft.getInstance().font, output_comp, 8, y + 5, 0xFFFFFFFF, false);
+        if (outputComp.contains(Component.literal("error"))) {
+            outputComp = Component.literal(output).withStyle(ChatFormatting.RED);
+        }
+
+        guiGraphics.fill(3 + xOffset, y + yOffset, Minecraft.getInstance().font.width(output) + 13 + xOffset, y + 17 + yOffset, 0x44000000);
+        guiGraphics.drawString(Minecraft.getInstance().font, outputComp, 8 + xOffset, y + 5 + yOffset, 0xFFFFFFFF, false);
     }
 
     public void calcScrollPosition() {
@@ -96,25 +133,25 @@ public class TimerOverlay implements IGuiOverlay {
         /*
         Explanation canMoveDown:
          scrollPosition: to get the local scrollPosition
-         getGuiScaledHeight: to take into account the height of the screen, otherwise you could scroll until the last timer reached the top of the screen
-         getRunningTimer.size * 20: to take into account the number of running timers (getRunningTimer.size) multiplied by the height of each timer (top margin included, bottom margin excluded)
-         - 4: the bottom margin
+         guiHeight: to take into account the height of the gui, otherwise you could scroll until the last timer reached the top of the gui
+         visibleTimerCount * 20: to take into account the number of visible multiplied by the height of each timer (top margin included, bottom margin excluded)
+         - 3: the bottom margin
         Explanation shouldSnapToMax:
          same as canMoveDown
          calculatedScrollDelta: to take into account the current calculatedScrollDelta, if its bigger or equal than 0
          */
 
         boolean isScrollDeltaPositive = calculatedScrollDelta > 0;
-        boolean canMoveDown = (scrollPosition + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - 3) < 0;
-        boolean shouldSnapToMax = (scrollPosition + calculatedScrollDelta + Minecraft.getInstance().getWindow().getGuiScaledHeight() - TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - 3) >= 0;
+        boolean canMoveDown = scrollPosition + DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight - visibleTimerCount * 20 - 3 < 0;
+        boolean shouldSnapToMax = scrollPosition + calculatedScrollDelta + DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight - visibleTimerCount * 20 - 3 >= 0;
 
         boolean isScrollDeltaNegative = calculatedScrollDelta < 0;
         boolean canMoveUp = scrollPosition > 0;
-        boolean shouldSnapToMin = (scrollPosition + calculatedScrollDelta) <= 0;
+        boolean shouldSnapToMin = scrollPosition + calculatedScrollDelta <= 0;
 
         if (isScrollDeltaPositive && canMoveDown) {
             if (shouldSnapToMax) {
-                scrollPosition = TimerHandler.getClientInstance(false).getRunningTimers().size() * 20 - Minecraft.getInstance().getWindow().getGuiScaledHeight() + 3;
+                scrollPosition = visibleTimerCount * 20 - DoctorGsTimers.INSTANCE.getTimersOptions().guiHeight + 3;
             } else {
                 scrollPosition += calculatedScrollDelta;
             }
@@ -144,7 +181,8 @@ public class TimerOverlay implements IGuiOverlay {
 
     @SubscribeEvent
     public static void mouseScrollingScreen(ScreenEvent.MouseScrolled.Pre event) {
-        if (event.getMouseX() < 150) {
+        int xOffset = (int) (DoctorGsTimers.INSTANCE.getTimersOptions().xOffset * Minecraft.getInstance().getWindow().getGuiScaledWidth());
+        if (event.getMouseX() > xOffset && event.getMouseX() < xOffset + 150) {
             InputHandler.scrollDelta = event.getScrollDeltaY();
         }
     }

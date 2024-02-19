@@ -50,13 +50,10 @@ public class TimersOptions {
             Options::genericValueLabel, new OptionInstance.IntRange(3, 20), 15, (valueInt) -> {
     });
 
-    /*public final OptionInstance<Integer> xOffset = new OptionInstance<>("options.x_offset", OptionInstance.noTooltip(), (text, value) ->
-            Component.translatable("options.percent_value", text, value), new OptionInstance.IntRange(0, 100), 0, (valueInt) -> {
-    });
+    public int guiHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
-    public final OptionInstance<Integer> yOffset = new OptionInstance<>("options.y_offset", OptionInstance.noTooltip(), (text, value) ->
-            Component.translatable("options.percent_value", text, value), new OptionInstance.IntRange(0, 100), 0, (valueInt) -> {
-    });*/
+    public float xOffset = 0;
+    public float yOffset = 0;
 
     public TimersOptions() {
         timersOptionsFile = new File(FMLPaths.CONFIGDIR.get() + "\\drgstimers-options.txt");
@@ -223,8 +220,9 @@ public class TimersOptions {
         pAccessor.process("showTimers", this.showTimers);
         pAccessor.process("scrollSensitivity", this.scrollSensitivity);
         pAccessor.process("maximumTimerWidth", this.maximumCharacters);
-        //pAccessor.process("xOffset", this.xOffset);
-        //pAccessor.process("yOffset", this.yOffset);
+        this.guiHeight = pAccessor.process("guiHeight", this.guiHeight);
+        this.xOffset = pAccessor.process("xOffset", this.xOffset);
+        this.yOffset = pAccessor.process("yOffset", this.yOffset);
     }
 
     static boolean isTrue(String pValue) {

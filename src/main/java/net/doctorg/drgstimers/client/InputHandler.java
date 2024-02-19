@@ -20,6 +20,7 @@ public abstract class InputHandler {
     public static final KeyMapping KEYBIND_OPEN_SETTINGS_MENU = new KeyMapping("key.open_settings_menu", GLFW.GLFW_KEY_P, KEY_CATEGORY_DOCTORGS_TIMERS);
 
     public static double scrollDelta;
+    private static boolean mouseReleased;
 
     @SubscribeEvent
     public static void handleKeyInput(InputEvent.Key event) {
@@ -54,5 +55,14 @@ public abstract class InputHandler {
             scrollDelta = event.getScrollDeltaY();
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerMouseButtonPre(InputEvent.MouseButton.Pre event) {
+        mouseReleased = event.getButton() == GLFW.GLFW_MOUSE_BUTTON_LEFT && event.getAction() == GLFW.GLFW_RELEASE;
+    }
+
+    public static boolean isMouseReleased() {
+        return mouseReleased;
     }
 }
