@@ -33,7 +33,11 @@ public class TimerOverlay implements IGuiOverlay {
     @Override
     public void render(ExtendedGui gui, GuiGraphics guiGraphics, float partialTick, int screenWidth, int screenHeight) {
 
-        if (gui.getMinecraft().screen instanceof TimersSettingsScreen || !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() || Minecraft.getInstance().screen instanceof PauseScreen) {
+        if (Minecraft.getInstance().screen instanceof TimersSettingsScreen ||
+                !DoctorGsTimers.INSTANCE.getTimersOptions().showTimers.get() ||
+                Minecraft.getInstance().screen instanceof PauseScreen ||
+                Minecraft.getInstance().screen instanceof EditTimersScreen ||
+                Minecraft.getInstance().screen instanceof EditTimerScreen) {
             return;
         }
 

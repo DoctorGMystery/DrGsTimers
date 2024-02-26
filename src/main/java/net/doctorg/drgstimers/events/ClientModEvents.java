@@ -22,5 +22,6 @@ public class ClientModEvents {
     public static void registerKeyMapping(RegisterKeyMappingsEvent event) {
         event.register(InputHandler.KEYBIND_SCROLL_TIMERS);
         event.register(InputHandler.KEYBIND_OPEN_SETTINGS_MENU);
+        event.register(InputHandler.KEYBIND_OPEN_EDIT_TIMERS);
     }
 }

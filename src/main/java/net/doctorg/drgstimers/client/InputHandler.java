@@ -1,8 +1,7 @@
 package net.doctorg.drgstimers.client;
 
+import net.doctorg.drgstimers.client.gui.EditTimersScreen;
 import net.doctorg.drgstimers.client.gui.TimersSettingsScreen;
-import net.doctorg.drgstimers.data.Timer;
-import net.doctorg.drgstimers.util.TimerHandler;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -18,6 +17,7 @@ public abstract class InputHandler {
 
     public static final KeyMapping KEYBIND_SCROLL_TIMERS = new KeyMapping("key.scroll_timers", GLFW.GLFW_KEY_G, KEY_CATEGORY_DOCTORGS_TIMERS);
     public static final KeyMapping KEYBIND_OPEN_SETTINGS_MENU = new KeyMapping("key.open_settings_menu", GLFW.GLFW_KEY_P, KEY_CATEGORY_DOCTORGS_TIMERS);
+    public static final KeyMapping KEYBIND_OPEN_EDIT_TIMERS = new KeyMapping("key.open_edit_timers", GLFW.GLFW_KEY_O, KEY_CATEGORY_DOCTORGS_TIMERS);
 
     public static double scrollDelta;
     private static boolean mouseReleased;
@@ -27,25 +27,8 @@ public abstract class InputHandler {
         if (KEYBIND_OPEN_SETTINGS_MENU.isDown()) {
             Minecraft.getInstance().setScreen(new TimersSettingsScreen());
         }
-        if (TimerHandler.getInstance() == null) {
-            return;
-        }
-        if (event.getKey() == GLFW.GLFW_KEY_KP_MULTIPLY) {
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-1", new Timer(10, 10, 5));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-2", new Timer(17, 1, 2));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-3", new Timer(55, 4, 7));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-4", new Timer(10, 10, 5));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-5", new Timer(17, 1, 2));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-6", new Timer(55, 4, 7));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-7", new Timer(10, 10, 5));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-8", new Timer(17, 1, 2));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-9", new Timer(55, 4, 7));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-10", new Timer(10, 10, 5));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-11", new Timer(17, 1, 2));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-12", new Timer(55, 4, 7));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-13", new Timer(10, 10, 5));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-14", new Timer(17, 1, 2));
-            TimerHandler.getInstance().getTimerStack().put("DEBUG-15", new Timer(55, 4, 7));
+        if (KEYBIND_OPEN_EDIT_TIMERS.isDown()) {
+            Minecraft.getInstance().setScreen(new EditTimersScreen());
         }
     }
 

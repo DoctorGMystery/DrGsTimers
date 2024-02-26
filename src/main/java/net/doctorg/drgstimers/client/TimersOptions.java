@@ -43,8 +43,7 @@ public class TimersOptions {
             Component.translatable("options.percent_value", text, value), new OptionInstance.IntRange(50, 200), 100, (valueInt) -> {
     });
 
-    public final OptionInstance<Boolean> showTimers = OptionInstance.createBoolean("options.show_timers_in_game", true, (valueBool) -> {
-    });
+    public final OptionInstance<Boolean> showTimers = OptionInstance.createBoolean("options.show_timers_in_game", true);
 
     public final OptionInstance<Integer> maximumCharacters = new OptionInstance<>("options.maximum_timer_name_characters", OptionInstance.noTooltip(),
             Options::genericValueLabel, new OptionInstance.IntRange(3, 20), 15, (valueInt) -> {

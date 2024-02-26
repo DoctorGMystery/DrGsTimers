@@ -17,6 +17,9 @@ public class TimersSettingsScreen extends Screen {
 
     private boolean changePositionMode = false;
 
+    private final Button addDebugTimers =
+            Button.builder(Component.translatable("timer_settings.screen.add_debug_timers"), (button) -> addDebugTimers()).build();
+
     private final Button changePosition =
             Button.builder(Component.translatable("timer_settings.screen.change_position"), (button) -> setChangePositionMode(true)).build();
 
@@ -89,10 +92,13 @@ public class TimersSettingsScreen extends Screen {
         transformBox.active = false;
         transformBox.visible = false;
 
+        addDebugTimers.setRectangle(100, 20, width - 100 - 10, height - 20 - 5);
+
         addRenderableWidget(transformBox);
         addRenderableWidget(changePosition);
         addRenderableWidget(changePositionDone);
         addRenderableWidget(changePositionReset);
+        addRenderableWidget(addDebugTimers);
 
         super.init();
     }
@@ -118,6 +124,8 @@ public class TimersSettingsScreen extends Screen {
             list.visible = false;
             changePosition.active = false;
             changePosition.visible = false;
+            addDebugTimers.active = false;
+            addDebugTimers.visible = false;
             changePositionDone.active = true;
             changePositionDone.visible = true;
             changePositionReset.active = true;
@@ -130,11 +138,31 @@ public class TimersSettingsScreen extends Screen {
         list.visible = true;
         changePosition.active = true;
         changePosition.visible = true;
+        addDebugTimers.active = true;
+        addDebugTimers.visible = true;
         changePositionDone.active = false;
         changePositionDone.visible = false;
         changePositionReset.active = false;
         changePositionReset.visible = false;
         transformBox.active = false;
         transformBox.visible = false;
+    }
+
+    public void addDebugTimers() {
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-1 set 10 10 5");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-2 set 17 1 2");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-3 set 55 4 7");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-4 set 10 10 5");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-5 set 17 1 2");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-6 set 55 4 7");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-7 set 10 10 5");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-8 set 17 1 2");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-9 set 55 4 7");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-10 set 10 10 5");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-11 set 17 1 2");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-12 set 55 4 7");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-13 set 10 10 5");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-14 set 17 1 2");
+        this.minecraft.player.connection.sendCommand("timer timers DEBUG-15 set 55 4 7");
     }
 }

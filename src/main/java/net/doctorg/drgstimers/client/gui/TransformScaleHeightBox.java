@@ -6,10 +6,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+@OnlyIn(Dist.CLIENT)
 public class TransformScaleHeightBox extends AbstractWidget {
 
     private boolean dragging = false;
